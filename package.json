@@ -1,0 +1,12 @@
+{
+  "name": "one-partner-portal",
+  "version": "1.0.0",
+  "description": "ONE PARTNER 정책자금 리드 생성 및 정밀 진단 포털",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
