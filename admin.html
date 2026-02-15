@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONE PARTNER 관리자 대시보드</title>
+  <link rel="icon" href="logo.png" type="image/png">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+      background: #0A1628; color: #FFFFFF; min-height: 100vh;
+    }
+
+    /* Login */
+    .login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .login-card {
+      background: #132240; border-radius: 20px;
+      padding: 40px 32px; width: 100%; max-width: 400px;
+      border: 1px solid #1E3A5F; text-align: center;
+    }
+    .login-logo { width: 80px; height: 80px; border-radius: 16px; margin-bottom: 16px; }
+    .login-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .login-subtitle { font-size: 14px; color: #8A9BB5; margin-bottom: 28px; }
+    .login-input {
+      width: 100%; background: #0D1E38; border-radius: 12px; padding: 16px 18px;
+      border: 1.5px solid #1E3A5F; color: #FFFFFF; font-size: 16px;
+      font-family: inherit; outline: none; margin-bottom: 14px;
+    }
+    .login-input:focus { border-color: #C9A84C; }
+    .login-input::placeholder { color: #5A6B80; }
+    .login-btn {
+      width: 100%; padding: 16px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #A8893D, #C9A84C, #E8D48B);
+      color: #0A1628; font-size: 17px; font-weight: 800;
+      cursor: pointer; font-family: inherit; margin-top: 4px;
+    }
+    .login-btn:active { transform: scale(0.98); }
+    .login-error { color: #F87171; font-size: 14px; margin-top: 12px; display: none; }
+
+    /* Dashboard */
+    .dashboard { display: none; }
+    .dashboard.visible { display: block; }
+
+    .dash-header {
+      background: #132240; border-bottom: 1px solid #1E3A5F;
+      padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .dash-header-left { display: flex; align-items: center; gap: 12px; }
+    .dash-logo { width: 40px; height: 40px; border-radius: 8px; }
+    .dash-title { font-size: 18px; font-weight: 800; }
+    .dash-subtitle { font-size: 12px; color: #8A9BB5; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .logout-btn {
+      background: none; border: 1px solid #1E3A5F; color: #8A9BB5;
+      padding: 8px 16px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; font-family: inherit;
+    }
+    .logout-btn:hover { border-color: #C9A84C; color: #C9A84C; }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex; background: #0D1E38; border-bottom: 1px solid #1E3A5F;
+      padding: 0 24px; overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 16px 24px; background: none; border: none; border-bottom: 3px solid transparent;
+      color: #8A9BB5; font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: inherit; white-space: nowrap; transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #C9A84C; }
+    .tab-btn.active { color: #C9A84C; border-bottom-color: #C9A84C; }
+    .tab-badge {
+      display: inline-block; background: #C9A84C; color: #0A1628;
+      font-size: 11px; font-weight: 800; padding: 2px 7px;
+      border-radius: 10px; margin-left: 6px; vertical-align: middle;
+    }
+
+    /* Tab Content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Stats */
+    .stats-bar { display: flex; gap: 16px; padding: 20px 24px; overflow-x: auto; }
+    .stat-card {
+      background: #132240; border-radius: 14px; padding: 20px;
+      border: 1px solid #1E3A5F; min-width: 160px; flex: 1;
+    }
+    .stat-label { font-size: 13px; color: #8A9BB5; margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 800; color: #C9A84C; }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px; gap: 12px; flex-wrap: wrap;
+    }
+    .toolbar-title { font-size: 18px; font-weight: 700; }
+    .toolbar-actions { display: flex; gap: 10px; }
+    .export-btn {
+      padding: 10px 20px; border-radius: 10px; border: 1.5px solid #C9A84C;
+      background: transparent; color: #C9A84C; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px;
+    }
+    .export-btn:hover { background: rgba(201,168,76,0.08); }
+    .refresh-btn {
+      padding: 10px 16px; border-radius: 10px; border: 1px solid #1E3A5F;
+      background: #132240; color: #8A9BB5; font-size: 14px;
+      cursor: pointer; font-family: inherit;
+    }
+    .refresh-btn:hover { border-color: #C9A84C; color: #C9A84C; }
+
+    /* Table */
+    .table-wrap { padding: 0 24px 40px; overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse; background: #132240;
+      border-radius: 14px; overflow: hidden; min-width: 900px;
+    }
+    thead { background: #0D1E38; }
+    th {
+      padding: 14px 16px; text-align: left; font-size: 13px; font-weight: 700;
+      color: #C9A84C; white-space: nowrap; border-bottom: 1px solid #1E3A5F;
+    }
+    td {
+      padding: 14px 16px; font-size: 13px; color: #FFFFFF;
+      border-bottom: 0.5px solid #1E3A5F; white-space: nowrap;
+    }
+    tr:hover td { background: rgba(201,168,76,0.04); }
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .badge-yes { background: rgba(239,68,68,0.15); color: #F87171; }
+    .badge-no { background: rgba(34,197,94,0.15); color: #4ADE80; }
+    .badge-lead { background: rgba(59,130,246,0.15); color: #60A5FA; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #8A9BB5; }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-text { font-size: 16px; font-weight: 600; }
+    .empty-sub { font-size: 14px; margin-top: 8px; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); z-index: 100;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal {
+      background: #132240; border-radius: 20px; padding: 32px;
+      max-width: 500px; width: 100%; border: 1px solid #1E3A5F;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 20px; font-weight: 800; }
+    .modal-close { background: none; border: none; color: #8A9BB5; font-size: 24px; cursor: pointer; }
+    .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 0.5px solid #1E3A5F; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: #8A9BB5; font-size: 14px; }
+    .detail-value { color: #FFFFFF; font-size: 14px; font-weight: 600; text-align: right; max-width: 60%; word-break: break-all; }
+    .delete-btn {
+      width: 100%; padding: 14px; border: none; border-radius: 12px;
+      background: rgba(239,68,68,0.15); color: #F87171;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      margin-top: 20px; font-family: inherit;
+    }
+    .delete-btn:hover { background: rgba(239,68,68,0.25); }
+
+    /* Telegram Settings */
+    .settings-section {
+      padding: 24px; max-width: 600px;
+    }
+    .settings-card {
+      background: #132240; border-radius: 16px; padding: 28px;
+      border: 1px solid #1E3A5F; margin-bottom: 20px;
+    }
+    .settings-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .settings-desc { font-size: 14px; color: #8A9BB5; margin-bottom: 20px; line-height: 1.6; }
+    .settings-label { font-size: 14px; color: #8A9BB5; font-weight: 600; margin-bottom: 8px; margin-top: 16px; }
+    .settings-input {
+      width: 100%; background: #0D1E38; border-radius: 10px; padding: 14px 16px;
+      border: 1.5px solid #1E3A5F; color: #FFFFFF; font-size: 15px;
+      font-family: inherit; outline: none;
+    }
+    .settings-input:focus { border-color: #C9A84C; }
+    .settings-input::placeholder { color: #5A6B80; }
+    .settings-btn {
+      padding: 14px 28px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #A8893D, #C9A84C, #E8D48B);
+      color: #0A1628; font-size: 15px; font-weight: 800;
+      cursor: pointer; font-family: inherit; margin-top: 20px; margin-right: 10px;
+    }
+    .settings-btn:active { transform: scale(0.98); }
+    .settings-btn.outline {
+      background: transparent; border: 1.5px solid #C9A84C; color: #C9A84C;
+    }
+    .status-dot {
+      display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+      margin-right: 6px; vertical-align: middle;
+    }
+    .status-on { background: #4ADE80; }
+    .status-off { background: #F87171; }
+    .status-text { font-size: 14px; font-weight: 600; vertical-align: middle; }
+
+    .guide-steps { margin-top: 16px; }
+    .guide-step {
+      display: flex; gap: 12px; padding: 10px 0;
+      border-bottom: 0.5px solid #1E3A5F; font-size: 14px; color: #8A9BB5; line-height: 1.5;
+    }
+    .guide-step:last-child { border-bottom: none; }
+    .guide-num {
+      background: #C9A84C; color: #0A1628; width: 24px; height: 24px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <img src="logo.png" alt="ONE PARTNER" class="login-logo">
+      <div class="login-title">관리자 로그인</div>
+      <div class="login-subtitle">ONE PARTNER 통합 관리 시스템</div>
+      <input type="password" class="login-input" id="adminPw" placeholder="관리자 비밀번호 입력" onkeypress="if(event.key==='Enter')doLogin()">
+      <button class="login-btn" onclick="doLogin()">로그인</button>
+      <div class="login-error" id="loginError">비밀번호가 올바르지 않습니다.</div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <div class="dash-header">
+      <div class="dash-header-left">
+        <img src="logo.png" alt="" class="dash-logo">
+        <div>
+          <div class="dash-title">관리자 대시보드</div>
+          <div class="dash-subtitle">ONE PARTNER 통합 관리</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('leads')" id="tabLeads">
+        1차 리드 신청 <span class="tab-badge" id="leadBadge">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('diagnosis')" id="tabDiagnosis">
+        2차 정밀 진단 <span class="tab-badge" id="diagBadge">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('telegram')" id="tabTelegram">
+        알림 설정
+      </button>
+    </div>
+
+    <!-- Tab 1: Leads -->
+    <div class="tab-content active" id="contentLeads">
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">총 리드 수</div>
+          <div class="stat-value" id="leadTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">오늘 접수</div>
+          <div class="stat-value" id="leadToday">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">이번 주</div>
+          <div class="stat-value" id="leadWeek">0</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="toolbar-title">리드 신청 목록</div>
+        <div class="toolbar-actions">
+          <button class="refresh-btn" onclick="loadAllData()">🔄 새로고침</button>
+          <button class="export-btn" onclick="exportLeads()">📥 엑셀 다운로드</button>
+        </div>
+      </div>
+      <div class="table-wrap"><div id="leadTable"></div></div>
+    </div>
+
+    <!-- Tab 2: Diagnosis -->
+    <div class="tab-content" id="contentDiagnosis">
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">총 접수 건수</div>
+          <div class="stat-value" id="diagTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">오늘 접수</div>
+          <div class="stat-value" id="diagToday">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">이번 주</div>
+          <div class="stat-value" id="diagWeek">0</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="toolbar-title">정밀 진단 접수 목록</div>
+        <div class="toolbar-actions">
+          <button class="refresh-btn" onclick="loadAllData()">🔄 새로고침</button>
+          <button class="export-btn" onclick="exportDiagnosis()">📥 엑셀 다운로드</button>
+        </div>
+      </div>
+      <div class="table-wrap"><div id="diagTable"></div></div>
+    </div>
+
+    <!-- Tab 3: Telegram Settings -->
+    <div class="tab-content" id="contentTelegram">
+      <div class="settings-section">
+        <div class="settings-card">
+          <div class="settings-title">텔레그램 알림 설정</div>
+          <div class="settings-desc">
+            새로운 리드 신청 또는 정밀 진단 서류가 접수되면 텔레그램으로 즉시 알림을 받을 수 있습니다.
+          </div>
+          <div style="margin-bottom:20px">
+            <span class="status-dot" id="telegramStatusDot"></span>
+            <span class="status-text" id="telegramStatusText"></span>
+          </div>
+
+          <div class="settings-card" style="background:#0D1E38;border-color:#1E3A5F;padding:20px">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#C9A84C">설정 가이드</div>
+            <div class="guide-steps">
+              <div class="guide-step">
+                <span class="guide-num">1</span>
+                <span>텔레그램에서 <b style="color:#fff">@BotFather</b>를 검색하여 대화를 시작합니다.</span>
+              </div>
+              <div class="guide-step">
+                <span class="guide-num">2</span>
+                <span><b style="color:#fff">/newbot</b> 명령어로 새 봇을 생성하고 Bot Token을 복사합니다.</span>
+              </div>
+              <div class="guide-step">
+                <span class="guide-num">3</span>
+                <span>생성된 봇에게 아무 메시지를 보낸 후, 브라우저에서 <b style="color:#fff">https://api.telegram.org/bot{토큰}/getUpdates</b> 에 접속하여 Chat ID를 확인합니다.</span>
+              </div>
+              <div class="guide-step">
+                <span class="guide-num">4</span>
+                <span>아래에 Bot Token과 Chat ID를 입력하고 저장합니다.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-label">Bot Token</div>
+          <input type="text" class="settings-input" id="botToken" placeholder="예: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+
+          <div class="settings-label">Chat ID</div>
+          <input type="text" class="settings-input" id="chatId" placeholder="예: 987654321">
+
+          <div style="margin-top:24px">
+            <button class="settings-btn" onclick="saveTelegramConfig()">저장</button>
+            <button class="settings-btn outline" onclick="testTelegram()">테스트 알림 보내기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">상세 정보</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div id="detailContent"></div>
+      <button class="delete-btn" id="deleteBtn">이 건 삭제</button>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PW = 'onepartner2026';
+    let leadsData = [];
+    let diagData = [];
+
+    // Auth
+    function doLogin() {
+      if (document.getElementById('adminPw').value === ADMIN_PW) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboard').classList.add('visible');
+        sessionStorage.setItem('op_admin', 'true');
+        loadAllData();
+        loadTelegramStatus();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+    function doLogout() {
+      sessionStorage.removeItem('op_admin');
+      document.getElementById('dashboard').classList.remove('visible');
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('adminPw').value = '';
+      document.getElementById('loginError').style.display = 'none';
+    }
+    if (sessionStorage.getItem('op_admin') === 'true') {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').classList.add('visible');
+      loadAllData();
+      loadTelegramStatus();
+    }
+
+    // Tabs
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      if (tab === 'leads') {
+        document.getElementById('tabLeads').classList.add('active');
+        document.getElementById('contentLeads').classList.add('active');
+      } else if (tab === 'diagnosis') {
+        document.getElementById('tabDiagnosis').classList.add('active');
+        document.getElementById('contentDiagnosis').classList.add('active');
+      } else {
+        document.getElementById('tabTelegram').classList.add('active');
+        document.getElementById('contentTelegram').classList.add('active');
+      }
+    }
+
+    // Load data
+    function loadAllData() {
+      fetch('/api/leads').then(r => r.json()).then(data => {
+        leadsData = data;
+        renderLeads(data);
+      }).catch(() => renderLeads([]));
+
+      fetch('/api/submissions').then(r => r.json()).then(data => {
+        diagData = data;
+        renderDiagnosis(data);
+      }).catch(() => renderDiagnosis([]));
+    }
+
+    function countStats(data) {
+      const total = data.length;
+      const today = new Date().toLocaleDateString('ko-KR');
+      const todayCount = data.filter(s => {
+        try { return new Date(s.submittedAt).toLocaleDateString('ko-KR') === today; } catch { return false; }
+      }).length;
+      const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+      const weekCount = data.filter(s => {
+        try { return new Date(s.submittedAt) >= weekAgo; } catch { return false; }
+      }).length;
+      return { total, todayCount, weekCount };
+    }
+
+    // Render Leads
+    function renderLeads(data) {
+      const stats = countStats(data);
+      document.getElementById('leadTotal').textContent = stats.total;
+      document.getElementById('leadToday').textContent = stats.todayCount;
+      document.getElementById('leadWeek').textContent = stats.weekCount;
+      document.getElementById('leadBadge').textContent = stats.total;
+
+      const container = document.getElementById('leadTable');
+      if (stats.total === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">아직 접수된 리드가 없습니다.</div><div class="empty-sub">고객이 진단을 신청하면 여기에 표시됩니다.</div></div>`;
+        return;
+      }
+      const sorted = [...data].reverse();
+      container.innerHTML = `<table><thead><tr>
+        <th>No.</th><th>접수일시</th><th>업종</th><th>지역</th><th>업체명</th><th>희망자금</th><th>성함</th><th>연락처</th><th>통화시간</th><th>상세</th>
+      </tr></thead><tbody>
+        ${sorted.map((s, i) => `<tr>
+          <td>${stats.total - i}</td>
+          <td>${s.submittedAt || '-'}</td>
+          <td>${s.industry || '-'}</td>
+          <td>${s.region || '-'}</td>
+          <td>${s.companyName || '-'}</td>
+          <td>${s.fundingAmount || '-'}</td>
+          <td>${s.contactName || '-'}</td>
+          <td>${s.contactPhone || '-'}</td>
+          <td>${s.preferredTime || '-'}</td>
+          <td><button class="refresh-btn" style="padding:6px 12px;font-size:12px" onclick='showLeadDetail(${JSON.stringify(s).replace(/'/g,"&#39;")})'>보기</button></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+    }
+
+    // Render Diagnosis
+    function renderDiagnosis(data) {
+      const stats = countStats(data);
+      document.getElementById('diagTotal').textContent = stats.total;
+      document.getElementById('diagToday').textContent = stats.todayCount;
+      document.getElementById('diagWeek').textContent = stats.weekCount;
+      document.getElementById('diagBadge').textContent = stats.total;
+
+      const container = document.getElementById('diagTable');
+      if (stats.total === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">아직 접수된 서류가 없습니다.</div><div class="empty-sub">고객이 서류를 제출하면 여기에 표시됩니다.</div></div>`;
+        return;
+      }
+      const sorted = [...data].reverse();
+      container.innerHTML = `<table style="min-width:1200px"><thead><tr>
+        <th>No.</th><th>접수일시</th><th>사업자등록증</th><th>직원수</th><th>23매출</th><th>24매출</th><th>25매출</th><th>신용점수</th><th>연체</th><th>정부대출</th><th>기타대출</th><th>상세</th>
+      </tr></thead><tbody>
+        ${sorted.map((s, i) => `<tr>
+          <td>${stats.total - i}</td>
+          <td>${s.submittedAt || '-'}</td>
+          <td>${s.bizFileName || '-'}</td>
+          <td>${s.employeeCount || '-'}명</td>
+          <td>${s.revenue2023 || '-'} 만원</td>
+          <td>${s.revenue2024 || '-'} 만원</td>
+          <td>${s.revenue2025 || '-'} 만원</td>
+          <td>${s.creditScore || '-'}점</td>
+          <td><span class="badge ${s.overdue === '있음' ? 'badge-yes' : 'badge-no'}">${s.overdue || '-'}</span></td>
+          <td><span class="badge ${s.govLoan === '있음' ? 'badge-yes' : 'badge-no'}">${s.govLoan || '-'}</span></td>
+          <td>${s.otherLoans || '-'}</td>
+          <td><button class="refresh-btn" style="padding:6px 12px;font-size:12px" onclick='showDiagDetail(${JSON.stringify(s).replace(/'/g,"&#39;")})'>보기</button></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+    }
+
+    // Detail Modals
+    function showLeadDetail(s) {
+      document.getElementById('modalTitle').textContent = '리드 상세 정보';
+      const rows = [
+        ['접수일시', s.submittedAt], ['업종', s.industry], ['지역', s.region],
+        ['업체명', s.companyName], ['희망 자금', s.fundingAmount],
+        ['성함', s.contactName], ['연락처', s.contactPhone], ['통화 가능 시간', s.preferredTime]
+      ];
+      document.getElementById('detailContent').innerHTML = rows.map(([l,v]) =>
+        `<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${v || '-'}</span></div>`
+      ).join('');
+      document.getElementById('deleteBtn').onclick = () => {
+        if (confirm('이 리드를 삭제하시겠습니까?')) {
+          fetch('/api/leads/' + s.id, { method: 'DELETE' }).then(() => { closeModal(); loadAllData(); });
+        }
+      };
+      document.getElementById('detailModal').classList.add('visible');
+    }
+
+    function showDiagDetail(s) {
+      document.getElementById('modalTitle').textContent = '정밀 진단 상세 정보';
+      const rows = [
+        ['접수일시', s.submittedAt], ['사업자등록증', s.bizFileName],
+        ['직원 수', (s.employeeCount || '-') + '명'],
+        ['2023 매출', (s.revenue2023 || '-') + ' 만원'],
+        ['2024 매출', (s.revenue2024 || '-') + ' 만원'],
+        ['2025 매출(예상)', (s.revenue2025 || '-') + ' 만원'],
+        ['신용 점수', (s.creditScore || '-') + '점'],
+        ['신용점수 캡처', s.creditFileName || '-'],
+        ['연체 여부', s.overdue], ['정부 대출', s.govLoan],
+      ];
+      if (s.govLoans && s.govLoans.length > 0) {
+        s.govLoans.forEach((l, i) => {
+          rows.push([`대출${i+1}: ${l.institution}`, `${l.date} / ${l.amount}만원`]);
+        });
+      }
+      rows.push(['기타 대출', s.otherLoans]);
+
+      document.getElementById('detailContent').innerHTML = rows.map(([l,v]) =>
+        `<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${v || '-'}</span></div>`
+      ).join('');
+      document.getElementById('deleteBtn').onclick = () => {
+        if (confirm('이 접수 건을 삭제하시겠습니까?')) {
+          fetch('/api/submissions/' + s.id, { method: 'DELETE' }).then(() => { closeModal(); loadAllData(); });
+        }
+      };
+      document.getElementById('detailModal').classList.add('visible');
+    }
+
+    function closeModal() { document.getElementById('detailModal').classList.remove('visible'); }
+
+    // Telegram
+    function loadTelegramStatus() {
+      fetch('/api/telegram-config').then(r => r.json()).then(data => {
+        const dot = document.getElementById('telegramStatusDot');
+        const text = document.getElementById('telegramStatusText');
+        if (data.hasToken && data.hasChatId) {
+          dot.className = 'status-dot status-on';
+          text.textContent = '알림 활성화됨';
+          text.style.color = '#4ADE80';
+        } else {
+          dot.className = 'status-dot status-off';
+          text.textContent = '알림 미설정';
+          text.style.color = '#F87171';
+        }
+      });
+    }
+
+    function saveTelegramConfig() {
+      const botToken = document.getElementById('botToken').value.trim();
+      const chatId = document.getElementById('chatId').value.trim();
+      if (!botToken || !chatId) { alert('Bot Token과 Chat ID를 모두 입력해주세요.'); return; }
+      fetch('/api/telegram-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ botToken, chatId })
+      }).then(r => r.json()).then(() => {
+        alert('텔레그램 설정이 저장되었습니다!');
+        loadTelegramStatus();
+      });
+    }
+
+    function testTelegram() {
+      fetch('/api/telegram-test', { method: 'POST' }).then(r => r.json()).then(() => {
+        alert('테스트 알림을 전송했습니다. 텔레그램을 확인해주세요!');
+      });
+    }
+
+    // Export
+    function exportLeads() {
+      if (leadsData.length === 0) { alert('내보낼 데이터가 없습니다.'); return; }
+      let csv = '\uFEFF';
+      csv += ['No','접수일시','업종','지역','업체명','희망자금','성함','연락처','통화시간'].join(',') + '\n';
+      leadsData.forEach((s, i) => {
+        csv += [i+1, `"${s.submittedAt||''}"`, `"${s.industry||''}"`, `"${s.region||''}"`,
+          `"${s.companyName||''}"`, `"${s.fundingAmount||''}"`, `"${s.contactName||''}"`,
+          `"${s.contactPhone||''}"`, `"${s.preferredTime||''}"`].join(',') + '\n';
+      });
+      downloadCSV(csv, 'ONE_PARTNER_리드신청');
+    }
+
+    function exportDiagnosis() {
+      if (diagData.length === 0) { alert('내보낼 데이터가 없습니다.'); return; }
+      let csv = '\uFEFF';
+      csv += ['No','접수일시','사업자등록증','직원수','23매출(만원)','24매출(만원)','25매출(만원)','신용점수','연체여부','정부대출','기타대출'].join(',') + '\n';
+      diagData.forEach((s, i) => {
+        csv += [i+1, `"${s.submittedAt||''}"`, `"${s.bizFileName||''}"`, s.employeeCount||'',
+          `"${s.revenue2023||''}"`, `"${s.revenue2024||''}"`, `"${s.revenue2025||''}"`,
+          s.creditScore||'', s.overdue||'', s.govLoan||'', `"${s.otherLoans||''}"`].join(',') + '\n';
+      });
+      downloadCSV(csv, 'ONE_PARTNER_정밀진단');
+    }
+
+    function downloadCSV(csv, prefix) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${prefix}_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
